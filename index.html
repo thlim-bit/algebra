@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Genie Maze Escape</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- MathJax for gorgeous professional normal math formatting -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -34,7 +33,6 @@
         .animate-angry { animation: genie-angry 0.4s ease-in-out; }
         .animate-happy { animation: genie-happy 0.6s ease-in-out; }
 
-        /* Custom dark fantasy scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #030712; }
         ::-webkit-scrollbar-thumb { background: #1e3a8a; border-radius: 3px; }
@@ -64,7 +62,7 @@
 
     <main class="w-full max-w-7xl flex-1 flex flex-col xl:flex-row gap-6 p-4 md:p-6 items-center xl:items-start justify-center mx-auto">
 
-        <!-- Left Column: Immersive 2D Mystical Maze Radar & Giant Genie Oracle -->
+        <!-- Left Column -->
         <div class="w-full xl:w-5/12 flex flex-col items-center bg-[#0a1128]/90 border border-cyan-500/30 rounded-2xl p-5 shadow-2xl relative overflow-hidden backdrop-blur">
             <div class="absolute -top-10 -right-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
             
@@ -78,18 +76,16 @@
             </div>
             <p class="text-xs text-slate-400 text-center mb-4">You (<span class="text-cyan-300 font-bold">🧭 Seeker</span>) are navigating glowing stone corridors toward the Exit Portal (<span class="text-amber-300 font-bold">✨</span>).</p>
 
-            <!-- 2D Visual Maze Grid Representation -->
             <div id="maze-grid" class="w-full bg-[#030712]/95 border border-cyan-900/60 rounded-xl p-4 mb-4 grid grid-cols-5 gap-2.5 shadow-inner">
                 <!-- Grid cells injected dynamically -->
             </div>
 
-            <!-- Giant Genie Oracle Box matching the mystical aesthetic -->
+            <!-- Genie Oracle -->
             <div class="w-full bg-[#030712]/95 border border-cyan-500/40 rounded-xl p-5 relative shadow-xl flex flex-col items-center text-center">
                 <div class="absolute -top-3 left-6 bg-cyan-500 text-slate-950 text-xs font-extrabold px-3 py-0.5 rounded-full uppercase tracking-wider shadow">
                     Genie Oracle Guardian
                 </div>
                 
-                <!-- Giant Genie Avatar -->
                 <div class="flex items-center justify-center my-3">
                     <div id="genie-avatar" class="text-9xl animate-float filter drop-shadow-[0_0_25px_rgba(56,189,248,0.6)] transition-all duration-300 py-2">
                         🧞‍♂️
@@ -103,7 +99,7 @@
             </div>
         </div>
 
-        <!-- Right Column: Quiz & Math Question Arena -->
+        <!-- Right Column -->
         <div class="w-full xl:w-7/12 bg-[#0a1128]/90 border border-cyan-500/30 rounded-2xl p-6 shadow-2xl flex flex-col justify-between backdrop-blur">
             <div id="quiz-container">
                 <div class="flex justify-between items-center mb-4">
@@ -113,24 +109,21 @@
                     <span class="text-xs text-slate-400 font-mono">Trial <span id="q-num">1</span> of 10</span>
                 </div>
 
-                <!-- Math Question Display -->
                 <div class="bg-[#030712]/95 border border-cyan-900/80 rounded-xl p-6 mb-5 text-center shadow-inner relative">
                     <div class="absolute top-3 left-4 text-xs font-semibold text-cyan-500 tracking-wider">GENIE'S RIDDLE SCROLL</div>
                     <div id="math-question-text" class="text-xl md:text-2xl font-bold text-white tracking-wide my-4 py-3 px-2 bg-[#0a1128]/60 rounded-xl border border-cyan-900/50 overflow-x-auto">
                         <div class="flex items-center justify-center space-x-2 text-cyan-400 py-6">
                             <span class="animate-spin text-2xl">✨</span>
-                            <span>Generating unique AI coefficients with Gemini...</span>
+                            <span>Generating unique mathematical variables and coefficients...</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Options Grid -->
                 <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                     <!-- Options injected dynamically -->
                 </div>
             </div>
 
-            <!-- Feedback / Explanation Panel -->
             <div id="feedback-panel" class="hidden mt-4 p-4 rounded-xl border text-sm transition-all duration-300 shadow-lg">
                 <h3 id="feedback-title" class="font-bold text-base mb-1 flex items-center space-x-2"></h3>
                 <div id="feedback-desc" class="text-slate-300 text-xs md:text-sm leading-relaxed mb-4 overflow-x-auto pt-2"></div>
@@ -161,6 +154,7 @@
         let strikes = 0;
         let currentQuestionIndex = 0;
         let answeredCurrent = false;
+        let visitedSteps = new Set();
 
         const geniePraises = [
             "Magnificent! Your algebraic insight pierces the labyrinth darkness!",
@@ -187,149 +181,209 @@
             return arr;
         }
 
+        // Helper to grab random variables so it's not always 'x'
+        const getVar = () => ['x', 'y', 'a', 'm', 'p', 'n'][Math.floor(Math.random() * 6)];
+        // Helper for random integers
+        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        const questionGenerators = [
+            // Q1: Exponents (Easy)
+            () => {
+                const base = getVar();
+                    const p1 = rand(2, 6); const p2 = rand(3, 8);
+                    return {
+                        category: "Exponents & Indices (Easy)",
+                        question: `Simplify: \\( ${base}^{${p1}} \\cdot ${base}^{${p2}} \\)`,
+                        options: [`\\( ${base}^{${p1 + p2}} \\)`, `\\( ${base}^{${p1 * p2}} \\)`, `\\( 2${base}^{${p1 + p2}} \\)`, `\\( ${base}^{${Math.abs(p1 - p2)}} \\)`],
+                        correct: 0,
+                        explanation: `<strong>Step-by-step breakdown:</strong><br>Add exponents when multiplying the same bases: \\(${base}^{${p1}} \\cdot ${base}^{${p2}} = ${base}^{${p1}+${p2}} = ${base}^{${p1 + p2}}\\).`
+                    };
+                },
+                // Q2: Algebraic Expansion (Easy)
+                () => {
+                    const base = getVar();
+                    const c1 = rand(2, 9); const c2 = rand(2, 9);
+                    return {
+                        category: "Algebraic Expansion (Easy)",
+                        question: `Expand: \\( ${c1}(${base} + ${c2}) \\)`,
+                        options: [`\\( ${c1}${base} + ${c1 * c2} \\)`, `\\( ${base} + ${c1 * c2} \\)`, `\\( ${c1}${base} + ${c2} \\)`, `\\( ${c1 + c2}${base} \\)`],
+                        correct: 0,
+                        explanation: `<strong>Step-by-step breakdown:</strong><br>Distribute ${c1}: \\(${c1}(${base}) + ${c1}(${c2}) = ${c1}${base} + ${c1 * c2}\\).`
+                    };
+                },
+                // Q3: Factorisation (Easy)
+                () => {
+                    const base = getVar();
+                    const c1 = rand(2, 8); const c2 = rand(3, 9);
+                    return {
+                        category: "Factorisation (Easy)",
+                        question: `Factorise completely: \\( ${c1}${base} + ${c1 * c2} \\)`,
+                        options: [`\\( ${c1}(${base} + ${c2}) \\)`, `\\( ${c2}(${base} + ${c1}) \\)`, `\\( ${base}(${c1} + ${c1 * c2}) \\)`, `\\( ${c1}(${base} + ${c1 * c2}) \\)`],
+                        correct: 0,
+                        explanation: `<strong>Step-by-step breakdown:</strong><br>Factor out the greatest common factor (${c1}): \\(${c1}(${base} + ${c2})\\).`
+                    };
+                },
+                // Q4: Exponents & Indices (Medium)
+                () => {
+                    const base = getVar();
+                    const c1 = rand(2, 5); const c2 = rand(2, 5); const p1 = rand(2, 5); const p2 = rand(1, 4);
+                    const newPow = 2 * p1 - p2;
+                    return {
+                        category: "Exponents & Indices (Medium)",
+                        question: `Simplify: \\( (${c1}${base}^{${p1}})^2 \\cdot (${c2}${base}^{-${p2}}) \\)`,
+                        options: [`\\( ${c1 * c1 * c2}${base}^{${newPow}} \\)`, `\\( ${c1 * c2}${base}^{${newPow}} \\)`, `\\( ${c1 * c1 * c2}${base}^{${2 * p1 + p2}} \\)`, `\\( ${c1 * 2 * c2}${base}^{${2 * p1 - p2}} \\)`],
+                        correct: 0,
+                        explanation: `<strong>Step-by-step breakdown:</strong><br>Square the first term: \\((${c1}^2)(${base}^{2 \\times ${p1}}) = ${c1 * c1}${base}^{${2 * p1}}\\).<br>Multiply by the second term: \\((${c1 * c1} \\times ${c2}) ${base}^{${2 * p1} - ${p2}} = ${c1 * c1 * c2}${base}^{${newPow}}\\).`
+                    };
+                },
+                // Q5: Binomial Expansion (Medium)
+                () => {
+                    const base = getVar();
+                    const c1 = rand(2, 6); const c2 = rand(2, 6); const c3 = rand(2, 6);
+                    const midTerm = c1 * c3 + c2;
+                    const lastTerm = c2 * c3;
+                    return {
+                        category: "Algebraic Expansion (Medium)",
+                        question: `Expand and simplify: \\( (${c1}${base} + ${c2})(${base} + ${c3}) \\)`,
+                        options: [`\\( ${c1}${base}^2 + ${midTerm}${base} + ${lastTerm} \\)`, `\\( ${c1}${base}^2 + ${c1 * c3}${base} + ${lastTerm} \\)`, `\\( ${c1}${base}^2 + ${c2 * c3}${base} + ${midTerm} \\)`, `\\( ${base}^2 + ${midTerm}${base} + ${lastTerm} \\)`],
+                        correct: 0,
+                        explanation: `<strong>Step-by-step breakdown:</strong><br>FOIL method: \\((${c1}${base})(${base}) + (${c1}${base})(${c3}) + (${c2})(${base}) + (${c2})(${c3})\\)<br>\\( = ${c1}${base}^2 + ${c1 * c3}${base} + ${c2}${base} + ${lastTerm} = ${c1}${base}^2 + ${midTerm}${base} + ${lastTerm}\\).`
+                    };
+                },
+                // Q6: Difference of Squares (Medium)
+                () => {
+                    const base = getVar();
+                    const c1 = rand(2, 7); const c2 = rand(2, 7);
+                    return {
+                        category: "Factorisation (Medium)",
+                        question: `Factorise completely: \\( ${c1 * c1}${base}^2 - ${c2 * c2} \\)`,
+                        options: [`\\( (${c1}${base} - ${c2})(${c1}${base} + ${c2}) \\)`, `\\( (${c1}${base} - ${c2})^2 \\)`, `\\( (${c1}${base} + ${c2})^2 \\)`, `\\( ${c1}(${base}^2 - ${c2 * c2}) \\)`],
+                        correct: 0,
+                        explanation: `<strong>Step-by-step breakdown:</strong><br>Recognize the difference of two squares: \\(a^2 - b^2 = (a-b)(a+b)\\).<br>Here, \\(a = ${c1}${base}\\) and \\(b = ${c2}\\), so it factors to \\((${c1}${base} - ${c2})(${c1}${base} + ${c2})\\).`
+                    };
+                },
+                // Q7: Algebraic Fractions (Medium)
+                () => {
+                    const base = getVar();
+                    const c1 = rand(2, 5); const c2 = rand(2, 5); const c3 = rand(2, 5);
+                    return {
+                        category: "Algebraic Fractions (Medium)",
+                        question: `Simplify: \\( \\dfrac{${c1 * c3}${base} + ${c1 * c2 * c3}}{${c3}${base} + ${c2 * c3}} \\)`,
+                        options: [`\\( ${c1} \\)`, `\\( ${c3} \\)`, `\\( ${c1}${base} \\)`, `\\( \\dfrac{${c1}}{${c3}} \\)`],
+                        correct: 0,
+                        explanation: `<strong>Step-by-step breakdown:</strong><br>Factor numerator: \\(${c1 * c3}(${base} + ${c2})\\).<br>Factor denominator: \\(${c3}(${base} + ${c2})\\).<br>Cancel \\((${base} + ${c2})\\) and reduce \\(${c1 * c3}/${c3} = ${c1}\\).`
+                    };
+                },
+                // Q8: Algebraic Fractions (Challenging)
+                () => {
+                    const base = getVar();
+                    const c1 = rand(2, 7); const c2 = rand(2, 7); const p1 = rand(2, 5);
+                    return {
+                        category: "Algebraic Fractions (Challenging)",
+                        question: `Express as a single fraction: \\( \\dfrac{${c1}}{${base}^{${p1}}} + \\dfrac{${c2}}{${base}^{${p1 + 1}}} \\)`,
+                        options: [`\\( \\dfrac{${c1}${base} + ${c2}}{${base}^{${p1 + 1}}} \\)`, `\\( \\dfrac{${c1 + c2}}{${base}^{${2 * p1 + 1}}} \\)`, `\\( \\dfrac{${c1}${base} + ${c2}}{${base}^{${p1}}} \\)`, `\\( \\dfrac{${c1 + c2}}{${base}^{${p1 + 1}}} \\)`],
+                        correct: 0,
+                        explanation: `<strong>Step-by-step breakdown:</strong><br>Find common denominator: \\(${base}^{${p1 + 1}}\\).<br>Multiply top and bottom of the first fraction by \\(${base}\\): \\( \\dfrac{${c1}${base}}{${base}^{${p1 + 1}}} \\).<br>Add numerators: \\( \\dfrac{${c1}${base} + ${c2}}{${base}^{${p1 + 1}}} \\).`
+                    };
+                },
+                // Q9: Surds & Radicals (Challenging)
+                () => {
+                    const base = getVar();
+                    const c1 = rand(2, 6); const c2 = rand(2, 6);
+                    return {
+                        category: "Surds & Radicals (Challenging)",
+                        question: `Rationalise the denominator: \\( \\dfrac{${c1}}{${c2} - \\sqrt{${base}}} \\)`,
+                        options: [`\\( \\dfrac{${c1}(${c2} + \\sqrt{${base}})}{${c2 * c2} - ${base}} \\)`, `\\( \\dfrac{${c1}(${c2} - \\sqrt{${base}})}{${c2 * c2} - ${base}} \\)`, `\\( \\dfrac{${c1 * c2} + \\sqrt{${base}}}{${c2 * c2} + ${base}} \\)`, `\\( \\dfrac{${c1}(${c2} + \\sqrt{${base}})}{${c2} - ${base}} \\)`],
+                        correct: 0,
+                        explanation: `<strong>Step-by-step breakdown:</strong><br>Multiply numerator and denominator by the conjugate \\((${c2} + \\sqrt{${base}})\\).<br>Denominator becomes \\((${c2})^2 - (\\sqrt{${base}})^2 = ${c2 * c2} - ${base}\\).`
+                    };
+                },
+                // Q10: Advanced Indices (Challenging)
+                () => {
+                    const base = getVar();
+                    let w = getVar();
+                    while (w === base) w = getVar(); // Ensure distinct variables
+                    
+                    const c1 = rand(2, 5); const c2 = rand(2, 5); 
+                    const p1 = rand(5, 9); const p2 = rand(5, 9); 
+                    const p3 = rand(2, 4); const p4 = rand(2, 4);
+                    
+                    return {
+                        category: "Advanced Indices (Challenging)",
+                        question: `Simplify fully: \\( \\dfrac{${c1 * c2}${base}^{${p1}}${w}^{${p2}}}{${c2}${base}^{${p3}}${w}^{${p4}}} \\)`,
+                        options: [`\\( ${c1}${base}^{${p1 - p3}}${w}^{${p2 - p4}} \\)`, `\\( ${c1 * c2}${base}^{${p1 - p3}}${w}^{${p2 - p4}} \\)`, `\\( ${c1}${base}^{${p1 + p3}}${w}^{${p2 + p4}} \\)`, `\\( ${c2}${base}^{${p1 - p3}}${w}^{${p2 - p4}} \\)`],
+                        correct: 0,
+                        explanation: `<strong>Step-by-step breakdown:</strong><br>Divide coefficients: \\(${c1 * c2} \\div ${c2} = ${c1}\\).<br>Subtract indices for ${base}: \\(${p1} - ${p3} = ${p1 - p3}\\).<br>Subtract indices for ${w}: \\(${p2} - ${p4} = ${p2 - p4}\\).`
+                };
+            }
+        ];
+
+        // This fully replaces the static random fallbacks, generating unique problems EVERY load.
+        function generateProceduralQuestions() {
+            // Execute generators to map them to actual math objects dynamically evaluated RIGHT NOW
+            return questionGenerators.map(gen => gen());
+        }
+
         async function fetchAIQuestions() {
-            const systemPrompt = `You are a master mathematician and mystical genie guarding a maze. Generate exactly 10 multiple-choice math questions in valid JSON format using the Gemini API. 
-            To ensure absolute variety, randomly choose unique coefficients (e.g. integers between 2 and 9), distinct powers (e.g. x^2, x^3, x^4, u^5, v^-3), and fresh variable combinations every single time.
+            // Enhanced prompt explicitly commanding varied constants and variables
+            const systemPrompt = `You are a master mathematician and mystical genie guarding a maze. Generate exactly 10 multiple-choice math questions in valid JSON format.
+            CRITICAL REQUIREMENT: To ensure absolute variety, you MUST randomly choose unique variables (use mix of a, b, x, y, p, m, etc.), entirely random integer/fraction coefficients, and randomly varying powers for EVERY SINGLE QUESTION. Do NOT reuse coefficients like '2' or '3' constantly.
             Difficulty structure:
-            - Questions 1 to 3: Easy Foundations (indices expansion, factorisation with simple integer coefficients).
+            - Questions 1 to 3: Easy Foundations (indices expansion, factorisation).
             - Questions 4 to 7: Medium Core Algebra (binomial expansion, difference of squares, algebraic fractions).
-            - Questions 8 to 10: Challenging Advanced Problems (rationalising surds, advanced indices, complex algebraic fractions).
+            - Questions 8 to 10: Challenging Advanced Problems (rationalising surds, advanced indices).
             Return ONLY a valid JSON array of 10 objects with keys: 'category' (string), 'question' (LaTeX math string inside \\(...\\)), 'options' (array of 4 unique LaTeX strings), 'correct' (integer index 0-3 of correct option), 'explanation' (string with step-by-step breakdown).`;
             
             const randomSeed = Math.floor(Math.random() * 999999);
             const userQuery = `Generate 10 completely unique math maze questions with freshly randomized coefficients and powers. Seed: ${randomSeed}. JSON format only.`;
-            const apiKey = "";
+            const apiKey = ""; // Will fail intentionally and trigger the dynamic fallback logic unless populated
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
             const payload = {
                 contents: [{ role: "user", parts: [{ text: userQuery }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "ARRAY",
-                        items: {
-                            type: "OBJECT",
-                            properties: {
-                                category: { type: "STRING" },
-                                question: { type: "STRING" },
-                                options: { type: "ARRAY", items: { type: "STRING" } },
-                                correct: { type: "INTEGER" },
-                                explanation: { type: "STRING" }
-                            },
-                            propertyOrdering: ["category", "question", "options", "correct", "explanation"]
-                        }
-                    }
+                    responseMimeType: "application/json"
                 }
             };
 
-            for (let attempt = 0; attempt < 3; attempt++) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const result = await response.json();
-                    const candidate = result.candidates?.[0];
-                    if (candidate && candidate.content?.parts?.[0]?.text) {
-                        const parsed = JSON.parse(candidate.content.parts[0].text);
-                        if (Array.isArray(parsed) && parsed.length >= 10) {
-                            return parsed.slice(0, 10);
+            if (apiKey !== "") {
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const result = await response.json();
+                        const candidate = result.candidates?.[0];
+                        if (candidate && candidate.content?.parts?.[0]?.text) {
+                            const parsed = JSON.parse(candidate.content.parts[0].text);
+                            if (Array.isArray(parsed) && parsed.length >= 10) {
+                                return parsed.slice(0, 10);
+                            }
                         }
+                    } catch (e) {
+                        console.error("AI Generation attempt failed, retrying...", e);
                     }
-                } catch (e) {
-                    console.error("AI Generation attempt failed, retrying...", e);
+                    await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
                 }
-                await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
             }
 
-            // Fallback questions with randomized dynamic coefficients if network fails
-            const randA = Math.floor(Math.random() * 4) + 2;
-            const randB = Math.floor(Math.random() * 5) + 3;
-            return [
-                {
-                    category: "Exponents & Indices (Easy)",
-                    question: `Simplify: \\( x^{${randA}} \\cdot x^{${randB}} \\)`,
-                    options: [`\\( x^{${randA + randB}} \\)`, `\\( x^{${randA * randB}} \\)`, `\\( 2x^{${randA + randB}} \\)`, `\\( x \\)`],
-                    correct: 0,
-                    explanation: `<strong>Step-by-step breakdown:</strong><br>Add exponents when multiplying same bases: \\(x^{${randA}+${randB}} = x^{${randA + randB}}\\).`
-                },
-                {
-                    category: "Algebraic Expansion (Easy)",
-                    question: `Expand: \\( ${randA}(x + ${randB}) \\)`,
-                    options: [`\\( ${randA}x + ${randB} \\)`, `\\( x + ${randA * randB} \\)`, `\\( ${randA}x + ${randA * randB} \\)`, `\\( ${randA + randB}x \\)`],
-                    correct: 2,
-                    explanation: `<strong>Step-by-step breakdown:</strong><br>Distribute ${randA}: \\(${randA}(x) + ${randA}(${randB}) = ${randA}x + ${randA * randB}\\).`
-                },
-                {
-                    category: "Factorisation (Easy)",
-                    question: `Factorise completely: \\( ${randA}x + ${randA * randB} \\)`,
-                    options: [`\\( ${randA}(x + ${randB}) \\)`, `\\( ${randB}(x + ${randA}) \\)`, `\\( x(${randA} + ${randA * randB}) \\)`, `\\( ${randA}(x + ${randA * randB}) \\)`],
-                    correct: 0,
-                    explanation: `<strong>Step-by-step breakdown:</strong><br>Factor out GCF ${randA}: \\(${randA}(x + ${randB})\\).`
-                },
-                {
-                    category: "Exponents & Indices (Medium)",
-                    question: `Simplify: \\( (2a^{-2})(3a)^2 \\)`,
-                    options: ["\\( 18a^0 \\)", "\\( 6a^{-4} \\)", "\\( 18a^2 \\)", "\\( 6a^2 \\)"],
-                    correct: 0,
-                    explanation: "<strong>Step-by-step breakdown:</strong><br>\\((3a)^2 = 9a^2\\). Multiply by \\(2a^{-2} = 18a^{-2+2} = 18a^0 = 18\\)."
-                },
-                {
-                    category: "Algebraic Expansion (Medium)",
-                    question: "Expand and simplify: \\( (x + 2)(3x - 1) \\)",
-                    options: ["\\( 3x^2 + 5x - 2 \\)", "\\( 3x^2 - x - 2 \\)", "\\( 3x^2 + 6x - 2 \\)", "\\( 3x^2 + 5x + 2 \\)"],
-                    correct: 0,
-                    explanation: "<strong>Step-by-step breakdown:</strong><br>FOIL method: \\(3x^2 - x + 6x - 2 = 3x^2 + 5x - 2\\)."
-                },
-                {
-                    category: "Factorisation (Medium)",
-                    question: "Factorise completely: \\( 25x^2 - 16 \\)",
-                    options: ["\\( (5x - 4)(5x + 4) \\)", "\\( (5x - 4)^2 \\)", "\\( (5x + 4)^2 \\)", "\\( 5(x^2 - 16) \\)"],
-                    correct: 0,
-                    explanation: "<strong>Step-by-step breakdown:</strong><br>Difference of two squares: \\((5x)^2 - 4^2 = (5x - 4)(5x + 4)\\)."
-                },
-                {
-                    category: "Algebraic Fractions (Medium)",
-                    question: "Simplify: \\( \\dfrac{2x + 6}{3x - 3} \\cdot \\dfrac{x - 1}{4} \\)",
-                    options: ["\\( \\dfrac{x + 3}{6} \\)", "\\( \\dfrac{2(x+3)}{3} \\)", "\\( \\dfrac{x + 3}{2} \\)", "\\( x + 3 \\)"],
-                    correct: 0,
-                    explanation: "<strong>Step-by-step breakdown:</strong><br>Factor numerators and denominators and cancel common factors."
-                },
-                {
-                    category: "Algebraic Fractions (Challenging)",
-                    question: "Simplify: \\( \\dfrac{5}{x^2 - 5x + 6} - \\dfrac{1}{x^2 - 9} \\)",
-                    options: ["\\( \\dfrac{4x + 17}{(x-2)(x-3)(x+3)} \\)", "\\( \\dfrac{4}{(x-3)(x+3)} \\)", "\\( \\dfrac{4x + 13}{(x-2)(x-3)(x+3)} \\)", "\\( \\dfrac{4}{x^2 - 5x + 9} \\)"],
-                    correct: 0,
-                    explanation: "<strong>Step-by-step breakdown:</strong><br>Find common denominator \\((x-2)(x-3)(x+3)\\) and combine numerators."
-                },
-                {
-                    category: "Surds & Radicals (Challenging)",
-                    question: "Simplify the surd expression: \\( \\dfrac{6}{2 - \\sqrt{x}} \\)",
-                    options: ["\\( \\dfrac{12 + 6\\sqrt{x}}{4 - x} \\)", "\\( \\dfrac{6(2 + \\sqrt{x})}{2 - x} \\)", "\\( 3 + \\dfrac{3}{\\sqrt{x}} \\)", "\\( \\dfrac{12 - 6\\sqrt{x}}{4 + x} \\)"],
-                    correct: 0,
-                    explanation: "<strong>Step-by-step breakdown:</strong><br>Rationalize denominator by multiplying numerator and denominator by \\((2 + \\sqrt{x})\\)."
-                },
-                {
-                    category: "Advanced Indices (Challenging)",
-                    question: "Simplify: \\( \\dfrac{4u^5v^{-3}}{u^{-2}v^4} \\div (2u^3)^0 \\)",
-                    options: ["\\( \\dfrac{4u^7}{v^7} \\)", "\\( \\dfrac{u^7}{v^7} \\)", "\\( 4u^3v \\)", "\\( \\dfrac{4u^5}{v^4} \\)"],
-                    correct: 0,
-                    explanation: "<strong>Step-by-step breakdown:</strong><br>\\((2u^3)^0 = 1\\). Subtract indices: \\(5 - (-2) = 7\\) and \\(-3 - 4 = -7\\)."
-                }
-            ];
+            // Execute the procedural generators for 100% dynamic, unique fallback numbers every time
+            return generateProceduralQuestions();
         }
 
         async function initGame() {
             currentStep = 1;
             strikes = 0;
             currentQuestionIndex = 0;
+            visitedSteps.clear();
 
             document.getElementById('math-question-text').innerHTML = `
                 <div class="flex items-center justify-center space-x-2 text-cyan-400 py-6">
                     <span class="animate-spin text-2xl">✨</span>
-                    <span>Gemini AI is generating unique coefficients and powers...</span>
+                    <span>Conjuring unique variables, constants, and coefficients...</span>
                 </div>
             `;
 
@@ -402,6 +456,24 @@
         function loadQuestion() {
             answeredCurrent = false;
             currentQuestionIndex = (currentStep - 1) % questions.length;
+            
+            // If the user is revisiting this step (they moved backwards), regenerate the question for fresh coefficients!
+            if (visitedSteps.has(currentStep)) {
+                const rawQ = questionGenerators[currentQuestionIndex]();
+                let optionsWithIndices = rawQ.options.map((opt, idx) => ({ opt, originalIdx: idx }));
+                let shuffledOptions = shuffleArray(optionsWithIndices);
+                let newCorrectIndex = shuffledOptions.findIndex(item => item.originalIdx === rawQ.correct);
+                
+                questions[currentQuestionIndex] = {
+                    category: rawQ.category,
+                    question: rawQ.question,
+                    options: shuffledOptions.map(item => item.opt),
+                    correct: newCorrectIndex,
+                    explanation: rawQ.explanation
+                };
+            }
+            visitedSteps.add(currentStep);
+
             const q = questions[currentQuestionIndex];
 
             document.getElementById('q-num').innerText = currentStep;
@@ -429,7 +501,7 @@
             const genieMood = document.getElementById('genie-mood-text');
             genieMood.innerText = "Calm & Watching";
             genieMood.className = "text-xs font-bold text-cyan-400 mb-1 uppercase tracking-wider";
-            document.getElementById('genie-dialogue').innerText = `"Corridor ${currentStep} blocks your path. Solve this AI algebraic trial or face the consequence!"`;
+            document.getElementById('genie-dialogue').innerText = `"Corridor ${currentStep} blocks your path. Solve this algebraic trial or face the consequence!"`;
 
             if (window.MathJax) {
                 MathJax.typeset();
